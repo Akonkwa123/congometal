@@ -1,0 +1,62 @@
+# Fichiers et dossiers à ignorer avec Git
+
+# Configuration locale
+.env
+.env.local
+.env.*.local
+config/local/
+
+# Base de données
+*.sql
+*.sqlite
+*.db
+
+# Dossier uploads (trop volumineux)
+admin/uploads/*
+!admin/uploads/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Cache
+cache/
+tmp/
+
+# Editeur
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Système
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dépendances (si vous utilisez Composer)
+vendor/
+composer.lock
+
+# Node.js (si vous utilisez npm)
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Installation
+install.php
+sample_data.php
+health_check.php
+
+# Documentation développeur
+DEPLOYMENT.md
+GUIDE_RAPIDRE.md
+PERSONNALISATION.html
+DEMARRAGE.txt
+
+# Archives
+*.zip
+*.tar.gz
+*.rar

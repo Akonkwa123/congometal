@@ -1,0 +1,6 @@
+Ce dossier contient les images téléchargées via le panel admin.
+
+Structure:
+- general/: Images des services et autres
+- portfolio/: Images des projets
+- testimonials/: Photos des témoignages
