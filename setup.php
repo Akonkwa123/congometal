@@ -254,7 +254,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clear_demo_projects']
             <li>Paramètres du site (logo, description, etc.)</li>
             <li>Galerie À propos (avec descriptions)</li>
             <li>Portfolio (avec slideshow animé)</li>
-            <li>Services, Témoignages, Contacts</li>
+            <li>Services, Contacts</li>
         </ul>
         <a href="/admin/dashboard.php" style="display: block; text-align: center;">
             <button style="width: 100%; background: #28a745; color: white;">✅ Aller au Tableau de Bord</button>

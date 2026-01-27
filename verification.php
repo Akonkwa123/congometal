@@ -299,7 +299,7 @@ require_once 'includes/config.php';
                 mysqli_close($db_check);
                 
                 // Vérifier les tables
-                $tables_to_check = ['users', 'services', 'portfolio', 'testimonials', 'contacts', 'settings'];
+                $tables_to_check = ['users', 'services', 'portfolio', 'events', 'event_media', 'contacts', 'settings'];
                 $db_check = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
                 
                 foreach ($tables_to_check as $table) {
@@ -338,7 +338,7 @@ require_once 'includes/config.php';
                 'PHP et Extensions' => ['type' => ['PHP', 'Extension']],
                 'Fichiers' => ['title' => ['Fichier']],
                 'Dossiers' => ['title' => ['Dossier']],
-                'Base de données' => ['label' => ['users', 'services', 'portfolio', 'testimonials', 'contacts', 'settings', DB_NAME]],
+                'Base de données' => ['label' => ['users', 'services', 'portfolio', 'events', 'event_media', 'contacts', 'settings', DB_NAME]],
                 'Sécurité' => ['label' => ['Activé', 'Désactivé']],
             ];
             
