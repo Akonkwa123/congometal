@@ -132,15 +132,94 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Formulaire de témoignage
+    const testimonialForm = document.getElementById('testimonialForm');
+    if (testimonialForm) {
+        testimonialForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch('includes/handle_testimonial.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                return response.text().then(text => {
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Réponse non JSON:', text);
+                        return { success: false, message: 'Erreur serveur. Veuillez réessayer.' };
+                    }
+                });
+            })
+            .then(data => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert ' + (data.success ? 'alert-success' : 'alert-error');
+                alertDiv.textContent = data.message;
+
+                testimonialForm.parentNode.insertBefore(alertDiv, testimonialForm);
+
+                if (data.success) {
+                    testimonialForm.reset();
+                    setTimeout(() => alertDiv.remove(), 5000);
+                }
+            })
+            .catch(() => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-error';
+                alertDiv.textContent = 'Erreur serveur. Veuillez réessayer.';
+                testimonialForm.parentNode.insertBefore(alertDiv, testimonialForm);
+            });
+        });
+    }
+
+    // Témoignages: actualisation automatique sur la page d'accueil
+    const testimonialDisplay = document.querySelector('.testimonial-display');
+    if (testimonialDisplay) {
+        const list = testimonialDisplay.querySelector('.testimonial-list');
+        const renderTestimonials = (items) => {
+            if (!list) return;
+            list.innerHTML = '';
+            items.forEach((t) => {
+                const item = document.createElement('div');
+                item.className = 'testimonial-item';
+                item.innerHTML =
+                    '<p class="testimonial-name">' +
+                    (t.name ? t.name : '') +
+                    '</p>' +
+                    '<p class="testimonial-text">"' +
+                    (t.message ? t.message : '') +
+                    '"</p>';
+                list.appendChild(item);
+            });
+        };
+
+        const fetchTestimonials = () => {
+            fetch('includes/fetch_testimonials.php')
+                .then((res) => res.json())
+                .then((data) => {
+                    if (data && data.success && Array.isArray(data.items)) {
+                        renderTestimonials(data.items);
+                    }
+                })
+                .catch(() => {});
+        };
+
+        fetchTestimonials();
+        setInterval(fetchTestimonials, 30000);
+    }
+
     // Portfolio Slideshow
     let currentPortfolioIndex = 0;
     const portfolioSlides = document.querySelectorAll('.portfolio-slide');
     
     if (portfolioSlides.length > 1) {
-        // Auto-play slideshow every 6 seconds
+        // Auto-play slideshow every 5 seconds
         setInterval(() => {
             portfolioSlide(1);
-        }, 300000);
+        }, 5000);
     }
 
     // Lightbox for gallery images

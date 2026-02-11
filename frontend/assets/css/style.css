@@ -32,6 +32,30 @@ header {
     width: 100%;
 }
 
+.main-navbar {
+    max-width: 100%;
+    margin: 0;
+}
+
+.main-navbar .container {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.main-navbar .container {
+    justify-content: flex-start;
+    gap: 1.25rem;
+}
+
+.main-navbar .header-social {
+    margin-left: auto;
+}
+
+.main-navbar .navbar-collapse {
+    flex-grow: 0;
+}
+
 .logo {
     font-size: 1.8rem;
     font-weight: bold;
@@ -484,6 +508,15 @@ section h2::after {
     margin-top: 3rem;
     --bs-gutter-x: 2.5rem;
     --bs-gutter-y: 2.5rem;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+.services-grid .service-card {
+    flex: 0 0 280px;
 }
 
 .service-card {
@@ -535,7 +568,7 @@ section h2::after {
 
 .service-card h3 {
     margin-bottom: 0.75rem;
-    color: #0f172a;
+    color: #f59e0b;
     font-size: 1.15rem;
     font-weight: 600;
 }
@@ -668,12 +701,14 @@ section h2::after {
 }
 
 .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1.75rem;
+    display: flex;
+    gap: 1.5rem;
+    overflow: hidden;
+    scroll-behavior: smooth;
 }
 
 .gallery-item {
+    flex: 0 0 320px;
     background: #ffffff;
     border-radius: 16px;
     overflow: hidden;
@@ -1289,7 +1324,9 @@ section h2::after {
 
 .about-detail-card h4 {
     margin-bottom: 0.6rem;
-    font-size: 1.05rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #f59e0b;
 }
 
 .about-detail-card p {
@@ -1428,6 +1465,181 @@ section h2::after {
 #events h2::after {
     width: 110px;
     background: linear-gradient(90deg, #0ea5e9 0%, #22c55e 100%);
+}
+
+.events-highlights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+    max-width: 1100px;
+    margin: 2rem auto 2.5rem;
+}
+
+.events-highlight-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+    padding: 1.25rem 1.35rem;
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+}
+
+.events-highlight-card h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+}
+
+.events-highlight-card p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.events-highlight-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(37, 99, 235, 0.12);
+    color: #2563eb;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex: 0 0 44px;
+}
+
+.event-posters-grid {
+    margin-top: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.6rem;
+}
+
+.event-poster-item {
+    background: #ffffff;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.event-poster-item img {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    display: block;
+    cursor: zoom-in;
+}
+
+.event-poster-title {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    color: #374151;
+}
+
+.event-poster-empty {
+    margin-top: 0.6rem;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.testimonial-form {
+    margin-top: 0.75rem;
+    display: grid;
+    gap: 0.5rem;
+}
+
+.testimonial-display {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.95));
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 16px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+    margin-top: 1rem;
+    min-height: 260px;
+    max-height: 420px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.testimonial-form input,
+.testimonial-form textarea {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    background: #ffffff;
+}
+
+.testimonial-form textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.testimonial-form button {
+    border: none;
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    background: linear-gradient(120deg, #2563eb, #1e40af);
+    color: #f9fafb;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.testimonial-list {
+    margin-top: 0.9rem;
+    display: grid;
+    gap: 0.7rem;
+}
+
+.testimonial-list.testimonial-list-horizontal {
+    display: flex;
+    gap: 0.8rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    scroll-snap-type: x mandatory;
+}
+
+.testimonial-list.testimonial-list-horizontal .testimonial-item {
+    min-width: 240px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+}
+
+@media (max-width: 700px) {
+    .testimonial-list.testimonial-list-horizontal {
+        flex-direction: column;
+        overflow-x: visible;
+    }
+
+    .testimonial-list.testimonial-list-horizontal .testimonial-item {
+        min-width: auto;
+    }
+}
+
+.testimonial-item {
+    background: #ffffff;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: 12px;
+    padding: 0.8rem 0.9rem;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.testimonial-text {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: #1f2937;
+}
+
+.testimonial-name {
+    margin: 0 0 0.45rem;
+    font-weight: 700;
+    color: #7b3f00;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
 }
 
 .events-grid {
@@ -1878,14 +2090,21 @@ section h2::after {
 footer {
     background-color: #111827;
     color: #e5e7eb;
-    padding: 3rem 0 2rem;
+    padding: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+footer .container {
+    max-width: 100%;
+    width: 100%;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
 .footer-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 2rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 3.5rem;
     align-items: flex-start;
 }
 
@@ -1894,6 +2113,25 @@ footer {
     font-size: 1rem;
     font-weight: 600;
     color: #f9fafb;
+}
+
+.footer-section {
+    padding: 0.25rem 0.4rem;
+}
+
+.footer-left {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2.75rem;
+    flex: 1;
+}
+
+.footer-left .footer-section {
+    padding: 0;
+}
+
+.footer-content > .footer-section {
+    min-width: 180px;
 }
 
 .footer-section p {
@@ -1921,6 +2159,21 @@ footer {
     text-decoration: underline;
 }
 
+.footer-mini-list li,
+.footer-contact-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-size: 0.95rem;
+    color: #d1d5db;
+}
+
+.footer-mini-list i,
+.footer-contact-list i {
+    color: #93c5fd;
+    margin-top: 0.15rem;
+}
+
 .footer-social-links {
     display: flex;
     gap: 0.75rem;
@@ -1944,6 +2197,28 @@ footer {
     text-align: center;
     font-size: 0.9rem;
     color: #9ca3af;
+}
+
+@media (max-width: 1024px) {
+    .footer-content {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .footer-left {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .footer-content {
+        gap: 1.5rem;
+    }
+
+    .footer-left {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Dark mode overrides */
@@ -2114,6 +2389,44 @@ body[data-theme="dark"] .event-card {
     color: #e5e7eb;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
     border-color: rgba(148, 163, 184, 0.45);
+}
+
+body[data-theme="dark"] .events-highlight-card {
+    background-color: #020617;
+    color: #e5e7eb;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
+    border-color: rgba(148, 163, 184, 0.45);
+}
+
+body[data-theme="dark"] .events-highlight-card p {
+    color: #cbd5f5;
+}
+
+body[data-theme="dark"] .event-poster-item {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(148, 163, 184, 0.35);
+}
+
+body[data-theme="dark"] .event-poster-title {
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .testimonial-item {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+body[data-theme="dark"] .testimonial-display {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+body[data-theme="dark"] .testimonial-text {
+    color: #e2e8f0;
+}
+
+body[data-theme="dark"] .testimonial-name {
+    color: #c77d3c;
 }
 
 body[data-theme="dark"] .event-body h3 {

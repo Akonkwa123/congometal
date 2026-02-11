@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../backend/includes/config.php';
 require_once __DIR__ . '/../backend/includes/functions.php';
+logSiteVisit();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -14,6 +15,36 @@ require_once __DIR__ . '/../backend/includes/functions.php';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body { font-family: 'Thomas', Arial, sans-serif; font-size: 16px; }
+        .site-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            object-fit: cover;
+            border: 2px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .about-clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .about-clamp.is-expanded {
+            display: block;
+            -webkit-line-clamp: unset;
+            overflow: visible;
+        }
+        .about-toggle {
+            margin-top: 0.5rem;
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-weight: 600;
+            padding: 0;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -25,7 +56,7 @@ require_once __DIR__ . '/../backend/includes/functions.php';
                     <?php $logo = getSetting('company_logo', ''); ?>
                     <?php $logo_alt = getSetting('company_logo_alt', getSetting('company_name', 'Congometal')); ?>
                     <?php if ($logo && file_exists(__DIR__ . '/../backend/admin/uploads/' . $logo)): ?>
-                        <img src="<?php echo UPLOAD_URL . htmlspecialchars($logo); ?>" alt="<?php echo htmlspecialchars($logo_alt); ?>" style="max-height:30px;vertical-align:middle;">
+                        <img src="<?php echo UPLOAD_URL . htmlspecialchars($logo); ?>" alt="<?php echo htmlspecialchars($logo_alt); ?>" class="site-logo">
                     <?php else: ?>
                         <?php echo getSetting('company_name', 'Congometal'); ?>
                     <?php endif; ?>
@@ -39,7 +70,7 @@ require_once __DIR__ . '/../backend/includes/functions.php';
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav ms-lg-auto nav-links mb-2 mb-lg-0">
+                    <ul class="navbar-nav nav-links mb-2 mb-lg-0">
                         <li class="nav-item"><a href="#home" class="nav-link active"><i class="bi bi-house-door-fill nav-icon"></i><span>Accueil</span></a></li>
                         <li class="nav-item"><a href="#about" class="nav-link"><i class="bi bi-info-circle nav-icon"></i><span>À propos</span></a></li>
                         <li class="nav-item"><a href="#services" class="nav-link"><i class="bi bi-grid nav-icon"></i><span>Services</span></a></li>
@@ -154,112 +185,51 @@ require_once __DIR__ . '/../backend/includes/functions.php';
         </div>
     </section>
 
-    <!-- About Section with Tabs Menu -->
+    <!-- About Section -->
     <section id="about">
         <div class="container">
             <div class="section-header">
                 <span class="section-kicker"><i class="bi bi-info-circle"></i> À propos</span>
-                <h2 class="about-title">À propos de nous</h2>
-                <p class="section-subtitle"><?php echo getSetting('about_subtitle', 'Découvrez qui nous sommes, notre histoire et notre mission.'); ?></p>
-            </div>
-            
-            <!-- Logo + About Content Layout -->
-            <div class="row align-items-center gy-4 about-top-row">
-                <!-- Logo Left Side -->
-                <div class="col-md-4 col-lg-3 text-center about-logo-wrap">
-                    <?php $logo = getSetting('company_logo', ''); ?>
-                    <?php if ($logo): ?>
-                        <div class="about-logo-card">
-                            <img src="<?php echo UPLOAD_URL . htmlspecialchars($logo); ?>" alt="<?php echo htmlspecialchars(getSetting('company_logo_alt', 'Logo')); ?>" class="about-logo-img">
-                        </div>
-                    <?php endif; ?>
-                </div>
-                
-                <!-- About Content Right Side -->
-                <div class="col-md-8 col-lg-9">
-                    <div class="about-hero-card">
-                        <div class="about-hero-media">
-                            <img src="<?php echo UPLOAD_URL . getSetting('about_image', 'about.jpg'); ?>" alt="<?php echo htmlspecialchars(getSetting('about_image_alt', 'À propos')); ?>" class="about-image">
-                        </div>
-                        <div class="about-text">
-                            <h3><?php echo getSetting('about_title', 'Qui sommes-nous ?'); ?></h3>
-                            <p><?php echo getSetting('about_description', 'Description de votre entreprise'); ?></p>
-                            <div class="about-highlight">
-                                <i class="bi bi-patch-check-fill"></i>
-                                <span><?php echo getSetting('about_highlight', 'Expertise, fiabilité et proximité au service de vos projets.'); ?></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <h2>À propos de l'entreprise</h2>
+                <p class="section-subtitle">Qui nous sommes, notre histoire, notre mission, nos objectifs et notre vision.</p>
             </div>
 
-            <!-- Tabs Menu -->
-            <div class="about-tabs-wrapper">
-                <div class="about-tabs-nav">
-                    <button class="about-tab-btn active" data-tab="who-we-are">
-                        <i class="bi bi-people-fill"></i>
-                        <span>Qui sommes-nous</span>
-                    </button>
-                </div>
-
-                <!-- Tab Contents -->
-                <div class="about-tab-panels">
-                    <div class="about-tab-content active" id="tab-who-we-are">
-                        <div class="about-tab-card about-tab-primary">
-                            <p><?php echo nl2br(htmlspecialchars(getSetting('tab_who_are_we', 'Contenu de la section « Qui sommes-nous » à remplir.'))); ?></p>
-                        </div>
-                    </div>
-
-                    <div class="about-tab-content" id="tab-policies">
-                        <div class="about-tab-card about-tab-policies">
-                            <p><?php echo nl2br(htmlspecialchars(getSetting('tab_policies', 'Contenu de la section « Nos Politiques » à remplir.'))); ?></p>
-                        </div>
-                    </div>
-
-                    <div class="about-tab-content" id="tab-history">
-                        <div class="about-tab-card about-tab-history">
-                            <p><?php echo nl2br(htmlspecialchars(getSetting('tab_history', 'Contenu de la section « Historique » à remplir.'))); ?></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- About Details: Story, Objectives, Vision, Mission -->
-            <div class="about-details-grid">
-                <?php
-                $story = getSetting('about_story', '');
-                $objectives = getSetting('about_objectives', '');
-                $vision = getSetting('about_vision', '');
-                $mission = getSetting('about_mission', '');
-                ?>
-
-                <?php if ($story): ?>
+            <div class="row g-4">
+                <div class="col-lg-6">
                     <div class="about-detail-card about-detail-story">
-                        <h4><i class="bi bi-journal-bookmark about-icon"></i> Notre Histoire</h4>
-                        <p><?php echo nl2br(htmlspecialchars($story)); ?></p>
+                        <h4><i class="bi bi-people-fill about-icon"></i> Qui sommes-nous</h4>
+                        <p class="about-clamp" id="about-who-text"><?php echo nl2br(htmlspecialchars(getSetting('about_who', 'Présentez votre entreprise en quelques lignes.'))); ?></p>
+                        <button type="button" class="about-toggle" data-target="about-who-text">Voir plus</button>
                     </div>
-                <?php endif; ?>
-
-                <?php if ($objectives): ?>
-                    <div class="about-detail-card about-detail-objectives">
-                        <h4><i class="bi bi-bullseye about-icon"></i> Nos Objectifs</h4>
-                        <p><?php echo nl2br(htmlspecialchars($objectives)); ?></p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="about-detail-card about-detail-history">
+                        <h4><i class="bi bi-journal-bookmark about-icon"></i> Histoire</h4>
+                        <p class="about-clamp" id="about-history-text"><?php echo nl2br(htmlspecialchars(getSetting('about_history', 'Racontez l’histoire et les grandes étapes.'))); ?></p>
+                        <button type="button" class="about-toggle" data-target="about-history-text">Voir plus</button>
                     </div>
-                <?php endif; ?>
-
-                <?php if ($vision): ?>
-                    <div class="about-detail-card about-detail-vision">
-                        <h4><i class="bi bi-stars about-icon"></i> Notre Vision</h4>
-                        <p><?php echo nl2br(htmlspecialchars($vision)); ?></p>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($mission): ?>
+                </div>
+                <div class="col-lg-4">
                     <div class="about-detail-card about-detail-mission">
-                        <h4><i class="bi bi-briefcase-fill about-icon"></i> Notre Mission</h4>
-                        <p><?php echo nl2br(htmlspecialchars($mission)); ?></p>
+                        <h4><i class="bi bi-briefcase-fill about-icon"></i> Mission</h4>
+                        <p class="about-clamp" id="about-mission-text"><?php echo nl2br(htmlspecialchars(getSetting('about_mission', 'Décrivez votre mission.'))); ?></p>
+                        <button type="button" class="about-toggle" data-target="about-mission-text">Voir plus</button>
                     </div>
-                <?php endif; ?>
+                </div>
+                <div class="col-lg-4">
+                    <div class="about-detail-card about-detail-objectives">
+                        <h4><i class="bi bi-bullseye about-icon"></i> Objectif</h4>
+                        <p class="about-clamp" id="about-objective-text"><?php echo nl2br(htmlspecialchars(getSetting('about_objective', 'Décrivez votre objectif principal.'))); ?></p>
+                        <button type="button" class="about-toggle" data-target="about-objective-text">Voir plus</button>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="about-detail-card about-detail-vision">
+                        <h4><i class="bi bi-stars about-icon"></i> Vision</h4>
+                        <p class="about-clamp" id="about-vision-text"><?php echo nl2br(htmlspecialchars(getSetting('about_vision', 'Partagez votre vision à long terme.'))); ?></p>
+                        <button type="button" class="about-toggle" data-target="about-vision-text">Voir plus</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -485,6 +455,79 @@ require_once __DIR__ . '/../backend/includes/functions.php';
                 <h2>Agenda de l&apos;entreprise</h2>
                 <p class="section-subtitle">Retrouvez les moments forts : c&eacute;r&eacute;monies, formations, lancements de projets et rencontres.</p>
             </div>
+            <div class="events-highlights">
+                <div class="events-highlight-card">
+                    <div class="events-highlight-icon"><i class="bi bi-megaphone"></i></div>
+                    <div>
+                        <h3>Affiches</h3>
+                        <p>Nos communications et visuels officiels d&apos;&eacute;v&eacute;nements.</p>
+                        <?php
+                        $posters = $conn->query("SELECT image_path, title FROM event_posters ORDER BY created_at DESC LIMIT 1");
+                        if ($posters && $posters->num_rows > 0):
+                        ?>
+                            <div class="event-posters-grid">
+                                <?php while ($p = $posters->fetch_assoc()): ?>
+                                    <div class="event-poster-item">
+                                        <img src="<?php echo UPLOAD_URL . htmlspecialchars($p['image_path']); ?>" alt="<?php echo htmlspecialchars($p['title'] ?? 'Affiche'); ?>" onclick="openEventLightboxFromImg(this)">
+                                        <?php if (!empty($p['title'])): ?>
+                                            <div class="event-poster-title"><?php echo htmlspecialchars($p['title']); ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endwhile; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="event-poster-empty">Aucune affiche pour le moment.</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="events-highlight-card">
+                    <div class="events-highlight-icon"><i class="bi bi-chat-quote"></i></div>
+                    <div>
+                        <h3>T&eacute;moignages</h3>
+                        <p>Les retours et avis des participants.</p>
+                        <form id="testimonialForm" class="testimonial-form" method="POST" action="includes/handle_testimonial.php">
+                            <input type="text" name="name" placeholder="Nom complet" required>
+                            <input type="email" name="email" placeholder="Email (optionnel)">
+                            <textarea name="message" placeholder="Votre temoignage" required></textarea>
+                            <button type="submit">Envoyer</button>
+                        </form>
+                        <?php
+                        $testimonials = false;
+                        $testimonialStatusCol = 'status';
+                        $testimonialStatusType = '';
+                        $resCols = $conn->query("SHOW COLUMNS FROM testimonials");
+                        if ($resCols) {
+                            while ($row = $resCols->fetch_assoc()) {
+                                if ($row['Field'] === 'status' || $row['Field'] === 'statut') {
+                                    $testimonialStatusCol = $row['Field'];
+                                    $testimonialStatusType = $row['Type'];
+                                }
+                            }
+                            $testimonialStatusMode = 'workflow';
+                            if ($testimonialStatusType && stripos($testimonialStatusType, 'active') !== false && stripos($testimonialStatusType, 'inactive') !== false) {
+                                $testimonialStatusMode = 'active_inactive';
+                            }
+                            $testimonialApprovedValue = $testimonialStatusMode === 'active_inactive' ? 'active' : 'approved';
+                            $testimonials = $conn->query(
+                                "SELECT name, message, created_at FROM testimonials WHERE `$testimonialStatusCol` = '$testimonialApprovedValue' ORDER BY created_at DESC"
+                            );
+                        }
+                        if ($testimonials && $testimonials->num_rows > 0):
+                        ?>
+                            <div class="testimonial-display">
+                                <div class="testimonial-list">
+                                    <?php while ($t = $testimonials->fetch_assoc()): ?>
+                                        <div class="testimonial-item">
+                                            <p class="testimonial-name"><?php echo htmlspecialchars($t['name']); ?></p>
+                                            <p class="testimonial-text">"<?php echo htmlspecialchars($t['message']); ?>"</p>
+                                        </div>
+                                    <?php endwhile; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
             <div class="events-grid">
                 <?php
                 $events = getEvents('active');
@@ -639,27 +682,35 @@ require_once __DIR__ . '/../backend/includes/functions.php';
                 <h3 class="values-title">
                     <i class="bi bi-gem about-icon"></i> Nos Valeurs
                 </h3>
+                <?php
+                $value_1_title = getSetting('value_1_title', 'Expertise');
+                $value_1_desc = getSetting('value_1_desc', 'Une equipe qualifiee avec des annees d experience dans le secteur industriel.');
+                $value_2_title = getSetting('value_2_title', 'Engagement');
+                $value_2_desc = getSetting('value_2_desc', 'Un engagement total envers la satisfaction de nos clients.');
+                $value_3_title = getSetting('value_3_title', 'Innovation');
+                $value_3_desc = getSetting('value_3_desc', 'Toujours a la pointe des dernieres technologies.');
+                ?>
                 <div class="values-grid">
                     <div class="value-card">
                         <div class="value-icon">
                             <i class="bi bi-building-gear values-icon"></i>
                         </div>
-                        <h4>Expertise</h4>
-                        <p>Une équipe qualifiée avec des années d'expérience dans le secteur industriel</p>
+                        <h4><?php echo htmlspecialchars($value_1_title); ?></h4>
+                        <p><?php echo htmlspecialchars($value_1_desc); ?></p>
                     </div>
                     <div class="value-card">
                         <div class="value-icon">
                             <i class="bi bi-people-fill values-icon"></i>
                         </div>
-                        <h4>Engagement</h4>
-                        <p>Un engagement total envers la satisfaction de nos clients</p>
+                        <h4><?php echo htmlspecialchars($value_2_title); ?></h4>
+                        <p><?php echo htmlspecialchars($value_2_desc); ?></p>
                     </div>
                     <div class="value-card">
                         <div class="value-icon">
                             <i class="bi bi-lightning-charge-fill values-icon"></i>
                         </div>
-                        <h4>Innovation</h4>
-                        <p>Toujours à la pointe des dernières technologies</p>
+                        <h4><?php echo htmlspecialchars($value_3_title); ?></h4>
+                        <p><?php echo htmlspecialchars($value_3_desc); ?></p>
                     </div>
                 </div>
             </div>
@@ -724,20 +775,57 @@ require_once __DIR__ . '/../backend/includes/functions.php';
     <footer>
         <div class="container">
             <div class="footer-content">
+                <div class="footer-left">
                 <div class="footer-section">
                     <h4>À propos</h4>
                     <p><?php echo getSetting('company_description', getSetting('company_name', 'Congometal') . ' est une entreprise spécialisée dans les services de qualité.'); ?></p>
                 </div>
                 <div class="footer-section">
-                    <h4>Liens rapides</h4>
-                    <ul>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#portfolio">Portfolio</a></li>
-                        <li><a href="#contact">Contact</a></li>
+                    <h4>Valeurs</h4>
+                    <ul class="footer-mini-list">
+                        <li><i class="bi bi-award"></i> <?php echo htmlspecialchars(getSetting('value_1_title', 'Expertise')); ?></li>
+                        <li><i class="bi bi-people-fill"></i> <?php echo htmlspecialchars(getSetting('value_2_title', 'Engagement')); ?></li>
+                        <li><i class="bi bi-lightning-charge"></i> <?php echo htmlspecialchars(getSetting('value_3_title', 'Innovation')); ?></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h4>Nous suivre</h4>
+                    <h4>Services</h4>
+                    <ul class="footer-mini-list">
+                        <?php
+                        $footer_services = getServices('active');
+                        $footer_count = 0;
+                        if ($footer_services && $footer_services->num_rows > 0) {
+                            while ($service = $footer_services->fetch_assoc()) {
+                                $footer_count++;
+                                if ($footer_count > 5) { break; }
+                                $title = $service['title'] ?? '';
+                                if (!$title) { continue; }
+                                ?>
+                                <li><i class="bi bi-check2-circle"></i> <?php echo htmlspecialchars($title); ?></li>
+                                <?php
+                            }
+                        }
+                        if ($footer_count === 0) {
+                            ?>
+                            <li><i class="bi bi-check2-circle"></i> Conception</li>
+                            <li><i class="bi bi-check2-circle"></i> Fabrication</li>
+                            <li><i class="bi bi-check2-circle"></i> Maintenance</li>
+                            <?php
+                        }
+                        ?>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Adresse</h4>
+                    <ul class="footer-contact-list">
+                        <li><i class="bi bi-geo-alt"></i> <?php echo getSetting('company_address', '123 Rue de l\'Entreprise'); ?></li>
+                        <li><i class="bi bi-telephone"></i> <?php echo getSetting('company_phone', '+243 (0) 1 23 45 67 89'); ?></li>
+                        <li><i class="bi bi-envelope"></i> <?php echo getSetting('company_email', 'contact@congometal.com'); ?></li>
+                    </ul>
+                </div>
+                </div>
+                <div class="footer-section">
+                    <h4>RÃ©seaux sociaux</h4>
                     <div class="footer-social-links">
                     <?php if (getSetting('social_facebook', '')): ?>
                         <a href="<?php echo htmlspecialchars(getSetting('social_facebook')); ?>" target="_blank" aria-label="Facebook">
@@ -808,6 +896,51 @@ require_once __DIR__ . '/../backend/includes/functions.php';
                     tabContent.style.display = 'block';
                     tabContent.classList.add('active');
                 }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggles = document.querySelectorAll('.about-toggle');
+            toggles.forEach(btn => {
+                const targetId = btn.getAttribute('data-target');
+                const target = targetId ? document.getElementById(targetId) : null;
+                if (!target) {
+                    btn.style.display = 'none';
+                    return;
+                }
+                const needsToggle = target.scrollHeight > target.clientHeight + 2;
+                if (!needsToggle) {
+                    btn.style.display = 'none';
+                    return;
+                }
+                btn.addEventListener('click', () => {
+                    const isExpanded = target.classList.toggle('is-expanded');
+                    btn.textContent = isExpanded ? 'Voir moins' : 'Voir plus';
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const track = document.querySelector('.gallery-grid');
+            if (!track) return;
+            const items = Array.from(track.querySelectorAll('.gallery-item'));
+            if (items.length <= 1) return;
+
+            let index = 0;
+            const advance = () => {
+                index = (index + 1) % items.length;
+                const target = items[index];
+                track.scrollTo({ left: target.offsetLeft, behavior: 'smooth' });
+            };
+
+            let timer = setInterval(advance, 3500);
+
+            track.addEventListener('mouseenter', () => clearInterval(timer));
+            track.addEventListener('mouseleave', () => {
+                clearInterval(timer);
+                timer = setInterval(advance, 3500);
             });
         });
     </script>

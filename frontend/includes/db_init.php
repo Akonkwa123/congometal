@@ -79,6 +79,41 @@ $sql_contacts = "CREATE TABLE IF NOT EXISTS contacts (
 )";
 $conn->query($sql_contacts) or die("ERREUR CONTACTS : " . $conn->error);
 
+// Table site_visits
+$sql_site_visits = "CREATE TABLE IF NOT EXISTS site_visits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    visit_date DATE NOT NULL,
+    ip VARCHAR(64) NOT NULL,
+    user_agent VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_visit (visit_date, ip),
+    INDEX idx_visit_date (visit_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+$conn->query($sql_site_visits) or die("ERREUR SITE_VISITS : " . $conn->error);
+
+// Table event_posters
+$sql_event_posters = "CREATE TABLE IF NOT EXISTS event_posters (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    image_path VARCHAR(255) NOT NULL,
+    order_position INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX(order_position)
+)";
+$conn->query($sql_event_posters) or die("ERREUR EVENT_POSTERS : " . $conn->error);
+
+// Table testimonials
+$sql_testimonials = "CREATE TABLE IF NOT EXISTS testimonials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    message TEXT NOT NULL,
+    status ENUM('new', 'approved', 'rejected') DEFAULT 'new',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+$conn->query($sql_testimonials) or die("ERREUR TESTIMONIALS : " . $conn->error);
+
 // Table settings
 $sql_settings = "CREATE TABLE IF NOT EXISTS settings (
     id INT AUTO_INCREMENT PRIMARY KEY,

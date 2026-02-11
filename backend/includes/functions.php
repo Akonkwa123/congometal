@@ -90,6 +90,41 @@ function updateSetting($key, $value) {
     return $conn->query($sql);
 }
 
+// Créer la table des visites si elle n'existe pas
+function ensureSiteVisitsTable() {
+    global $conn;
+    $sql = "CREATE TABLE IF NOT EXISTS site_visits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        visit_date DATE NOT NULL,
+        ip VARCHAR(64) NOT NULL,
+        user_agent VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_visit (visit_date, ip),
+        INDEX idx_visit_date (visit_date)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+    $conn->query($sql);
+}
+
+// Enregistrer une visite unique par IP et par jour
+function logSiteVisit() {
+    global $conn;
+    if (empty($conn)) {
+        return;
+    }
+    ensureSiteVisitsTable();
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    if ($ip === '') {
+        return;
+    }
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $date = date('Y-m-d');
+    $ip = $conn->real_escape_string($ip);
+    $ua = $conn->real_escape_string(substr($ua, 0, 255));
+    $date = $conn->real_escape_string($date);
+
+    $conn->query("INSERT IGNORE INTO site_visits (visit_date, ip, user_agent) VALUES ('$date', '$ip', '$ua')");
+}
+
 // Fonction pour télécharger une image
 function uploadImage($file, $folder = 'general') {
     if (!isset($file) || $file['error'] === UPLOAD_ERR_NO_FILE) {

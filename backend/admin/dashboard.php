@@ -8,6 +8,17 @@ if (!isAdmin()) {
     header("Location: login.php");
     exit();
 }
+
+function dashboardImageUrl($path) {
+    $path = trim((string)$path, " \t\n\r\0\x0B\"'");
+    if ($path === '') {
+        return '';
+    }
+    if (preg_match('~^https?://~i', $path)) {
+        return $path;
+    }
+    return UPLOAD_URL . ltrim($path, '/');
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -16,7 +27,7 @@ if (!isAdmin()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord Admin - Congometal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         :root {
@@ -239,9 +250,16 @@ if (!isAdmin()) {
             border: 1px solid rgba(148, 163, 184, 0.3);
         }
 
+        .dashboard-grid .card.is-active {
+            box-shadow: 0 16px 36px rgba(37, 99, 235, 0.35);
+            border: 1px solid rgba(37, 99, 235, 0.6);
+        }
+
+
         #dashboard .card {
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
         #dashboard .card::after {
@@ -279,10 +297,167 @@ if (!isAdmin()) {
             margin-bottom: 0.25rem;
         }
 
+        .settings-block {
+            margin-top: 1.5rem;
+            padding: 1.25rem 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: #f8fafc;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .settings-blocks {
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .settings-blocks .settings-block {
+            flex: 1 1 280px;
+            margin-top: 0;
+        }
+
+        @media (min-width: 1100px) {
+            .settings-blocks {
+                flex-wrap: nowrap;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .settings-blocks {
+                flex-direction: column;
+            }
+        }
+
+        .settings-block h3 {
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--admin-text);
+        }
+
+        .settings-block-body {
+            max-height: 280px;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+        }
+
+        .settings-block.is-expanded .settings-block-body {
+            max-height: none;
+        }
+
+        .settings-toggle {
+            margin-top: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--admin-primary);
+            font-weight: 600;
+            padding: 0;
+            cursor: pointer;
+        }
+
         .card p {
             margin: 0;
             font-size: 0.9rem;
             color: var(--admin-muted);
+        }
+
+        .dashboard-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            padding: 1.5rem;
+        }
+
+        .dashboard-modal.active {
+            display: flex;
+        }
+
+        .dashboard-modal-content {
+            width: min(920px, 100%);
+            max-height: 85vh;
+            background: #ffffff;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        }
+
+        .dashboard-modal-body {
+            padding: 1.2rem 1.5rem 1.5rem;
+            overflow-y: auto;
+        }
+
+        .image-lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1300;
+            padding: 1.5rem;
+        }
+
+        .image-lightbox.active {
+            display: flex;
+        }
+
+        .image-lightbox img {
+            max-width: min(1100px, 96vw);
+            max-height: 85vh;
+            border-radius: 14px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45);
+            background: #fff;
+        }
+
+        .image-lightbox-close {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-modal-close {
+            border: none;
+            background: rgba(15, 23, 42, 0.08);
+            border-radius: 999px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+        }
+
+        .dashboard-detail-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .dashboard-detail-table th,
+        .dashboard-detail-table td {
+            padding: 0.6rem 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+            font-size: 0.92rem;
         }
 
         table {
@@ -550,11 +725,26 @@ if (!isAdmin()) {
     </style>
 </head>
 <body>
+    <script>
+        window.openDashboardModal = function (key, cardEl) {
+            var modal = document.getElementById('dashboard-modal');
+            var modalTitle = document.getElementById('dashboard-modal-title');
+            var modalBody = document.getElementById('dashboard-modal-body');
+            if (!modal || !modalTitle || !modalBody) return;
+            var detail = document.querySelector('#dashboard-details [data-detail="' + key + '"]');
+            var titleEl = cardEl ? cardEl.querySelector('span') : null;
+            modalTitle.textContent = titleEl ? titleEl.textContent : 'Détails';
+            modalBody.innerHTML = detail ? detail.innerHTML : '<p>Aucun détail disponible.</p>';
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            modal.style.display = 'flex';
+        };
+    </script>
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
         <i class="bi bi-list"></i>
     </button>
-    <div class="admin-container">
+        <div class="admin-container">
         <!-- Sidebar -->
         <div class="sidebar">
             <h2>Admin Panel</h2>
@@ -567,7 +757,9 @@ if (!isAdmin()) {
                 <li><a href="#" onclick="showSection('services')" class="nav-link"><i class="bi bi-grid me-2"></i><span>Services</span></a></li>
                 <li><a href="#" onclick="showSection('portfolio')" class="nav-link"><i class="bi bi-columns-gap me-2"></i><span>Portfolio</span></a></li>
                 <li><a href="#" onclick="showSection('events')" class="nav-link"><i class="bi bi-calendar-event me-2"></i><span>Evenements</span></a></li>
+                <li><a href="#" onclick="showSection('event-posters')" class="nav-link"><i class="bi bi-megaphone me-2"></i><span>Affiches</span></a></li>
                 <li><a href="#" onclick="showSection('contacts')" class="nav-link"><i class="bi bi-envelope-open me-2"></i><span>Contacts</span></a></li>
+                <li><a href="#" onclick="showSection('testimonials')" class="nav-link"><i class="bi bi-chat-quote me-2"></i><span>Témoignages</span></a></li>
                 <li><a href="#" onclick="showSection('users')" class="nav-link"><i class="bi bi-person-badge me-2"></i><span>Utilisateurs</span></a></li>
             </ul>
             <div class="logout">
@@ -607,6 +799,15 @@ if (!isAdmin()) {
                     $result = $conn->query("SELECT COUNT(*) as count FROM contacts WHERE status = 'new'");
                     $stats['contacts'] = $result->fetch_assoc()['count'];
 
+                    // Site visits (unique per IP and day)
+                    ensureSiteVisitsTable();
+                    $result = $conn->query("SELECT COUNT(*) as count FROM site_visits");
+                    $stats['visitors_total'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+                    $result = $conn->query("SELECT COUNT(*) as count FROM site_visits WHERE visit_date = CURDATE()");
+                    $stats['visitors_today'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+                    $result = $conn->query("SELECT COUNT(*) as count FROM site_visits WHERE YEARWEEK(visit_date, 1) = YEARWEEK(CURDATE(), 1)");
+                    $stats['visitors_week'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+
                     // Gallery (About)
                     $result = $conn->query("SELECT COUNT(*) as count FROM about_gallery");
                     $stats['gallery'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
@@ -614,35 +815,337 @@ if (!isAdmin()) {
                     // Team (active members)
                     $result = $conn->query("SELECT COUNT(*) as count FROM team_members WHERE is_active = 1");
                     $stats['team'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+
+                    // Event posters
+                    $result = $conn->query("SELECT COUNT(*) as count FROM event_posters");
+                    $stats['posters'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+
+                    // Testimonials (support legacy column name)
+                    $testimonialStatusCol = 'status';
+                    $testimonialStatusType = '';
+                    $cols = [];
+                    $resCols = $conn->query("SHOW COLUMNS FROM testimonials");
+                    if ($resCols) {
+                        while ($row = $resCols->fetch_assoc()) {
+                            $cols[$row['Field']] = true;
+                            if ($row['Field'] === 'status' || $row['Field'] === 'statut') {
+                                $testimonialStatusType = $row['Type'];
+                            }
+                        }
+                    }
+                    if (!isset($cols['status']) && isset($cols['statut'])) {
+                        $testimonialStatusCol = 'statut';
+                    }
+                    if (!isset($cols['status']) && !isset($cols['statut'])) {
+                        $conn->query("ALTER TABLE testimonials ADD COLUMN status ENUM('new','approved','rejected') DEFAULT 'new'");
+                        $testimonialStatusCol = 'status';
+                        $testimonialStatusType = "enum('new','approved','rejected')";
+                    }
+
+                    $testimonialStatusMode = 'workflow';
+                    if ($testimonialStatusType && stripos($testimonialStatusType, 'active') !== false && stripos($testimonialStatusType, 'inactive') !== false) {
+                        $testimonialStatusMode = 'active_inactive';
+                    }
+
+                    $testimonialApprovedValue = $testimonialStatusMode === 'active_inactive' ? 'active' : 'approved';
+                    $testimonialRejectedValue = $testimonialStatusMode === 'active_inactive' ? 'inactive' : 'rejected';
+                    $testimonialNewValue = $testimonialStatusMode === 'active_inactive' ? 'inactive' : 'new';
+
+                    if ($testimonialStatusMode === 'active_inactive') {
+                        $result = $conn->query("SELECT COUNT(*) as count FROM testimonials WHERE `$testimonialStatusCol` = 'active'");
+                        $stats['testimonials_approved'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+                        $result = $conn->query("SELECT COUNT(*) as count FROM testimonials WHERE `$testimonialStatusCol` = 'inactive'");
+                        $stats['testimonials_rejected'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+                        $stats['testimonials_new'] = 0;
+                    } else {
+                        $result = $conn->query("SELECT COUNT(*) as count FROM testimonials WHERE `$testimonialStatusCol` = 'new'");
+                        $stats['testimonials_new'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+                        $result = $conn->query("SELECT COUNT(*) as count FROM testimonials WHERE `$testimonialStatusCol` = 'approved'");
+                        $stats['testimonials_approved'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+                        $result = $conn->query("SELECT COUNT(*) as count FROM testimonials WHERE `$testimonialStatusCol` = 'rejected'");
+                        $stats['testimonials_rejected'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
+                    }
+                    $result = $conn->query("SELECT COUNT(*) as count FROM testimonials");
+                    $stats['testimonials_total'] = $result ? ($result->fetch_assoc()['count'] ?? 0) : 0;
                     ?>
-                    <div class="card">
+                    <div class="card" data-card="services" onclick="openDashboardModal('services', this)">
                         <h3><i class="bi bi-grid-3x3-gap-fill"></i><span>Services</span></h3>
                         <div class="number"><?php echo $stats['services']; ?></div>
                         <p>Services actifs</p>
                     </div>
-                    <div class="card">
+                    <div class="card" data-card="portfolio" onclick="openDashboardModal('portfolio', this)">
                         <h3><i class="bi bi-briefcase"></i><span>Portfolio</span></h3>
                         <div class="number"><?php echo $stats['portfolio']; ?></div>
                         <p>Projets</p>
                     </div>
-                    <div class="card">
+                    <div class="card" data-card="events" onclick="openDashboardModal('events', this)">
                         <h3><i class="bi bi-calendar-event"></i><span>Evenements</span></h3>
                         <div class="number"><?php echo $stats['events']; ?></div>
                         <p>Evenements actifs</p>
-                    </div><div class="card">
+                    </div>
+                    <div class="card" data-card="contacts" onclick="openDashboardModal('contacts', this)">
                         <h3><i class="bi bi-envelope-open"></i><span>Nouveaux contacts</span></h3>
                         <div class="number"><?php echo $stats['contacts']; ?></div>
                         <p>Messages non lus</p>
                     </div>
-                    <div class="card">
+                    <div class="card" data-card="visitors" onclick="openDashboardModal('visitors', this)">
+                        <h3><i class="bi bi-eye"></i><span>Visiteurs</span></h3>
+                        <div class="number"><?php echo $stats['visitors_total']; ?></div>
+                        <p>Aujourd&apos;hui: <?php echo $stats['visitors_today']; ?></p>
+                        <p>Cette semaine: <?php echo $stats['visitors_week']; ?></p>
+                    </div>
+                    <div class="card" data-card="gallery" onclick="openDashboardModal('gallery', this)">
                         <h3><i class="bi bi-images"></i><span>Galerie</span></h3>
                         <div class="number"><?php echo $stats['gallery']; ?></div>
                         <p>Images de la galerie</p>
                     </div>
-                    <div class="card">
+                    <div class="card" data-card="team" onclick="openDashboardModal('team', this)">
                         <h3><i class="bi bi-people"></i><span>Équipe</span></h3>
                         <div class="number"><?php echo $stats['team']; ?></div>
                         <p>Membres actifs</p>
+                    </div>
+                    <div class="card" data-card="posters" onclick="openDashboardModal('posters', this)">
+                        <h3><i class="bi bi-megaphone"></i><span>Affiches</span></h3>
+                        <div class="number"><?php echo $stats['posters']; ?></div>
+                        <p>Affiches publiées</p>
+                    </div>
+                    <div class="card" data-card="testimonials" onclick="openDashboardModal('testimonials', this)">
+                        <h3><i class="bi bi-chat-quote"></i><span>Témoignages</span></h3>
+                        <div class="number"><?php echo $stats['testimonials_total']; ?></div>
+                        <p>Total: <?php echo $stats['testimonials_total']; ?></p>
+                        <p>Valid&eacute;s: <?php echo $stats['testimonials_approved']; ?> &middot; Rejet&eacute;s: <?php echo $stats['testimonials_rejected']; ?></p>
+                    </div>
+                </div>
+
+                <div id="dashboard-details" style="display:none;">
+                    <div data-detail="services">
+                        <h3>Derniers services actifs</h3>
+                        <div class="action-buttons" style="margin:0 0 0.8rem;">
+                            <a href="add_service.php" class="btn-add"><i class="bi bi-plus-circle me-1"></i><span>Ajouter</span></a>
+                        </div>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Titre</th><th>Description</th><th>Statut</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $res = $conn->query("SELECT id, title, description, status FROM services ORDER BY updated_at DESC");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        $desc = $row['description'] ?? '';
+                                        echo '<tr><td>' . htmlspecialchars($row['title']) . '</td><td>' . htmlspecialchars($desc) . '</td><td>' . htmlspecialchars($row['status']) . '</td><td><a href="edit_service.php?id=' . (int)$row['id'] . '" class="btn-edit"><i class="bi bi-pencil-square me-1"></i><span>Editer</span></a> <a href="delete_service.php?id=' . (int)$row['id'] . '" class="btn-delete" onclick="return confirm(\'Êtes-vous sûr?\');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a></td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"4\">Aucun service.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="portfolio">
+                        <h3>Derniers projets</h3>
+                        <div class="action-buttons" style="margin:0 0 0.8rem;">
+                            <a href="add_portfolio.php" class="btn-add"><i class="bi bi-plus-circle me-1"></i><span>Ajouter</span></a>
+                            <a href="manage_portfolio.php" class="btn-edit"><i class="bi bi-collection me-1"></i><span>Gérer</span></a>
+                        </div>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Titre</th><th>Catégorie</th><th>Client</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $res = $conn->query("SELECT id, title, category, client FROM portfolio ORDER BY created_at DESC");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        echo '<tr><td>' . htmlspecialchars($row['title']) . '</td><td>' . htmlspecialchars($row['category']) . '</td><td>' . htmlspecialchars($row['client']) . '</td><td><a href="edit_portfolio.php?id=' . (int)$row['id'] . '" class="btn-edit"><i class="bi bi-pencil-square me-1"></i><span>Editer</span></a> <a href="delete_portfolio.php?id=' . (int)$row['id'] . '" class="btn-delete" onclick="return confirm(\'Êtes-vous sûr?\');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a></td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"4\">Aucun projet.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="events">
+                        <h3>Derniers événements</h3>
+                        <div class="action-buttons" style="margin:0 0 0.8rem;">
+                            <a href="add_event.php" class="btn-add"><i class="bi bi-plus-circle me-1"></i><span>Ajouter</span></a>
+                        </div>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Titre</th><th>Date</th><th>Lieu</th><th>Statut</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $res = $conn->query("SELECT id, title, event_date, location, status FROM events ORDER BY event_date DESC, created_at DESC");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        $date = !empty($row['event_date']) ? date('d/m/Y', strtotime($row['event_date'])) : '-';
+                                        echo '<tr><td>' . htmlspecialchars($row['title']) . '</td><td>' . $date . '</td><td>' . htmlspecialchars($row['location']) . '</td><td>' . htmlspecialchars($row['status']) . '</td><td><a href="edit_event.php?id=' . (int)$row['id'] . '" class="btn-edit"><i class="bi bi-pencil-square me-1"></i><span>Editer</span></a> <a href="delete_event.php?id=' . (int)$row['id'] . '" class="btn-delete" onclick="return confirm(\'Êtes-vous sûr?\');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a></td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"5\">Aucun événement.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="contacts">
+                        <h3>Derniers contacts</h3>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Nom</th><th>Email</th><th>Sujet</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $res = $conn->query("SELECT id, name, email, subject, status, created_at FROM contacts ORDER BY created_at DESC");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        echo '<tr><td>' . htmlspecialchars($row['name']) . '</td><td>' . htmlspecialchars($row['email']) . '</td><td>' . htmlspecialchars($row['subject']) . '</td><td>' . htmlspecialchars($row['status']) . '</td><td>' . date('d/m/Y H:i', strtotime($row['created_at'])) . '</td><td><a href="view_contact.php?id=' . (int)$row['id'] . '" class="btn-edit"><i class="bi bi-eye me-1"></i><span>Voir</span></a> <a href="delete_contact.php?id=' . (int)$row['id'] . '" class="btn-delete" onclick="return confirm(\'Êtes-vous sûr?\');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a></td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"6\">Aucun contact.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="visitors">
+                        <h3>Visiteurs rÃ©cents</h3>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Date</th><th>IP</th><th>Navigateur</th></tr></thead>
+                            <tbody>
+                                <?php
+                                ensureSiteVisitsTable();
+                                $res = $conn->query("SELECT visit_date, ip, user_agent, created_at FROM site_visits ORDER BY created_at DESC LIMIT 200");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        $date = !empty($row['visit_date']) ? date('d/m/Y', strtotime($row['visit_date'])) : '-';
+                                        $ua = $row['user_agent'] ?? '';
+                                        echo '<tr><td>' . $date . '</td><td>' . htmlspecialchars($row['ip']) . '</td><td>' . htmlspecialchars($ua) . '</td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"3\">Aucun visiteur.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="gallery">
+                        <h3>Dernières images (galerie)</h3>
+                        <div class="action-buttons" style="margin:0 0 0.8rem;">
+                            <a href="add_about_gallery.php" class="btn-add"><i class="bi bi-plus-circle me-1"></i><span>Ajouter</span></a>
+                        </div>
+                        <table class="dashboard-detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Texte</th>
+                                    <?php
+                                    $cols = [];
+                                    $colRes = $conn->query("SHOW COLUMNS FROM about_gallery");
+                                    if ($colRes) {
+                                        while ($col = $colRes->fetch_assoc()) {
+                                            $cols[$col['Field']] = true;
+                                        }
+                                    }
+                                    $hasDesc = isset($cols['description']);
+                                    if ($hasDesc) {
+                                        echo '<th>Description</th>';
+                                    }
+                                    ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $sql = $hasDesc
+                                    ? "SELECT image_path, image_alt, description FROM about_gallery ORDER BY created_at DESC"
+                                    : "SELECT image_path, image_alt FROM about_gallery ORDER BY created_at DESC";
+                                $res = $conn->query($sql);
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        $thumb = htmlspecialchars(dashboardImageUrl($row['image_path'] ?? ''));
+                                        $desc = $row['description'] ?? '';
+                                        echo '<tr><td><img src=\"' . $thumb . '\" class=\"dashboard-zoomable\" style=\"width:60px;height:45px;object-fit:cover;border-radius:6px;cursor:zoom-in;\"></td><td>' . htmlspecialchars($row['image_alt']) . '</td>';
+                                        if ($hasDesc) {
+                                            echo '<td>' . htmlspecialchars($desc) . '</td>';
+                                        }
+                                        echo '</tr>';
+                                    }
+                                } else {
+                                    $colspan = $hasDesc ? 3 : 2;
+                                    echo '<tr><td colspan=\"' . $colspan . '\">Aucune image.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="team">
+                        <h3>Membres de l'équipe</h3>
+                        <div class="action-buttons" style="margin:0 0 0.8rem;">
+                            <a href="manage_team.php" class="btn-edit"><i class="bi bi-people me-1"></i><span>Gérer</span></a>
+                        </div>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Nom</th><th>Poste</th><th>Email</th><th>Téléphone</th><th>Statut</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $res = $conn->query("SELECT name, position, email, phone, is_active FROM team_members ORDER BY display_order, name");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        $status = $row['is_active'] ? 'Actif' : 'Inactif';
+                                        echo '<tr><td>' . htmlspecialchars($row['name']) . '</td><td>' . htmlspecialchars($row['position']) . '</td><td>' . htmlspecialchars($row['email']) . '</td><td>' . htmlspecialchars($row['phone']) . '</td><td>' . $status . '</td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"5\">Aucun membre.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="posters">
+                        <h3>Affiches récentes</h3>
+                        <div class="action-buttons" style="margin:0 0 0.8rem;">
+                            <a href="#" onclick="showSection('event-posters')" class="btn-add"><i class="bi bi-plus-circle me-1"></i><span>Ajouter</span></a>
+                            <a href="#" onclick="showSection('event-posters')" class="btn-edit"><i class="bi bi-megaphone me-1"></i><span>Gérer</span></a>
+                        </div>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Affiche</th><th>Titre</th><th>Ordre</th><th>Date</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $res = $conn->query("SELECT id, image_path, title, order_position, created_at FROM event_posters ORDER BY created_at DESC");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        $thumb = htmlspecialchars(dashboardImageUrl($row['image_path'] ?? ''));
+                                        echo '<tr><td><img src=\"' . $thumb . '\" style=\"width:60px;height:45px;object-fit:cover;border-radius:6px;\"></td><td>' . htmlspecialchars($row['title']) . '</td><td>' . (int)$row['order_position'] . '</td><td>' . date('d/m/Y H:i', strtotime($row['created_at'])) . '</td><td><a href="delete_event_poster.php?id=' . (int)$row['id'] . '" class="btn-delete" onclick="return confirm(\'Êtes-vous sûr?\');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a></td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"5\">Aucune affiche.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div data-detail="testimonials">
+                        <h3>Témoignages récents</h3>
+                        <div class="action-buttons" style="margin:0 0 0.8rem;">
+                            <a href="#" onclick="showSection('testimonials')" class="btn-edit"><i class="bi bi-chat-quote me-1"></i><span>Gérer</span></a>
+                        </div>
+                        <table class="dashboard-detail-table">
+                            <thead><tr><th>Nom</th><th>Message</th><th>Statut</th><th>Date</th><th>Actions</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $res = $conn->query("SELECT id, name, message, `$testimonialStatusCol` AS status, created_at FROM testimonials ORDER BY created_at DESC");
+                                if ($res && $res->num_rows > 0) {
+                                    while ($row = $res->fetch_assoc()) {
+                                        $msg = $row['message'] ?? '';
+                                        $actions = '';
+                                        if ($row['status'] !== $testimonialApprovedValue) {
+                                            $actions .= '<a href="approve_testimonial.php?id=' . (int)$row['id'] . '" class="btn-edit"><i class="bi bi-check2-circle me-1"></i><span>Valider</span></a> ';
+                                        }
+                                        if ($row['status'] !== $testimonialRejectedValue) {
+                                            $actions .= '<a href="reject_testimonial.php?id=' . (int)$row['id'] . '" class="btn-edit"><i class="bi bi-x-circle me-1"></i><span>Rejeter</span></a> ';
+                                        }
+                                        $actions .= '<a href="delete_testimonial.php?id=' . (int)$row['id'] . '" class="btn-delete" onclick="return confirm(\'Êtes-vous sûr?\');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a>';
+                                        echo '<tr><td>' . htmlspecialchars($row['name']) . '</td><td>' . htmlspecialchars($msg) . '</td><td>' . htmlspecialchars($row['status']) . '</td><td>' . date('d/m/Y H:i', strtotime($row['created_at'])) . '</td><td>' . $actions . '</td></tr>';
+                                    }
+                                } else {
+                                    echo '<tr><td colspan=\"5\">Aucun témoignage.</td></tr>';
+                                }
+                                ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -651,146 +1154,168 @@ if (!isAdmin()) {
             <div id="settings" class="content-section">
                 <h2>Paramètres du site</h2>
                 <div id="settings-message" class="alert" style="display: none; max-width: 700px;"></div>
-                <form id="settings-form" method="POST" action="save_settings.php" class="card" style="max-width: 700px;" enctype="multipart/form-data">
-                    <div class="form-group">
+                <form id="settings-form" method="POST" action="save_settings.php" class="card" style="max-width: 100%; width: 100%;" enctype="multipart/form-data">
+                    <div class="settings-blocks">
+                        <div class="settings-block">
+                        <h3>Informations générales</h3>
+                        <div class="settings-block-body">
+                        <div class="form-group">
                         <label for="site_title">Titre du site</label>
                         <input type="text" id="site_title" name="site_title" value="<?php echo htmlspecialchars(getSetting('site_title', '')); ?>" required>
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="company_name">Nom de l'entreprise</label>
                         <input type="text" id="company_name" name="company_name" value="<?php echo htmlspecialchars(getSetting('company_name', '')); ?>" required>
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="company_logo">Logo de l'entreprise</label>
                         <?php $logo = getSetting('company_logo', ''); ?>
                         <div style="margin-bottom:10px;">
-                            <img id="logo-preview" src="<?php echo $logo ? UPLOAD_URL . ltrim($logo, '/') : ''; ?>" alt="Logo" style="max-height:60px; <?php echo $logo ? '' : 'display:none;'; ?>">
+                            <img id="logo-preview" src="<?php echo $logo ? htmlspecialchars(dashboardImageUrl($logo)) : ''; ?>" alt="Logo" style="max-height:60px; <?php echo $logo ? '' : 'display:none;'; ?>">
                         </div>
                         <input type="file" id="company_logo" name="company_logo" accept="image/*" onchange="previewImage(this, 'logo-preview')">
                         <small>Format: PNG, JPG, SVG, max 2Mo</small>
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="company_logo_alt">Alt text du logo (accessibilité)</label>
                         <input type="text" id="company_logo_alt" name="company_logo_alt" value="<?php echo htmlspecialchars(getSetting('company_logo_alt', '')); ?>" placeholder="Ex: Logo de Mon Entreprise">
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="company_description">Description de l'entreprise</label>
                         <textarea id="company_description" name="company_description"><?php echo htmlspecialchars(getSetting('company_description', '')); ?></textarea>
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="company_email">Email</label>
                         <input type="email" id="company_email" name="company_email" value="<?php echo htmlspecialchars(getSetting('company_email', '')); ?>">
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="company_phone">Téléphone</label>
                         <input type="tel" id="company_phone" name="company_phone" value="<?php echo htmlspecialchars(getSetting('company_phone', '')); ?>">
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
+                        <label for="company_phone_2">Téléphone 2</label>
+                        <input type="tel" id="company_phone_2" name="company_phone_2" value="<?php echo htmlspecialchars(getSetting('company_phone_2', '')); ?>">
+                        </div>
+                        <div class="form-group">
+                        <label for="company_phone_3">Téléphone 3</label>
+                        <input type="tel" id="company_phone_3" name="company_phone_3" value="<?php echo htmlspecialchars(getSetting('company_phone_3', '')); ?>">
+                        </div>
+                        <div class="form-group">
                         <label for="company_address">Adresse</label>
                         <input type="text" id="company_address" name="company_address" value="<?php echo htmlspecialchars(getSetting('company_address', '')); ?>">
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="company_hours">Horaires</label>
                         <textarea id="company_hours" name="company_hours"><?php echo htmlspecialchars(getSetting('company_hours', '')); ?></textarea>
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="hero_title">Titre du héros</label>
                         <input type="text" id="hero_title" name="hero_title" value="<?php echo htmlspecialchars(getSetting('hero_title', '')); ?>">
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="hero_subtitle">Sous-titre du héros</label>
                         <input type="text" id="hero_subtitle" name="hero_subtitle" value="<?php echo htmlspecialchars(getSetting('hero_subtitle', '')); ?>">
-                    </div>
-                    <div class="form-group">
+                        </div>
+                        <div class="form-group">
                         <label for="hero_background_image">Image de fond du héros</label>
                         <?php $hero_bg = getSetting('hero_background_image', ''); ?>
                         <div style="margin-bottom:10px;">
-                            <img id="hero-image-preview" src="<?php echo $hero_bg ? UPLOAD_URL . ltrim($hero_bg, '/') : ''; ?>" alt="Fond héro" style="max-height:100px; <?php echo $hero_bg ? '' : 'display:none;'; ?>">
+                            <img id="hero-image-preview" src="<?php echo $hero_bg ? htmlspecialchars(dashboardImageUrl($hero_bg)) : ''; ?>" alt="Fond héro" style="max-height:100px; <?php echo $hero_bg ? '' : 'display:none;'; ?>">
                         </div>
                         <input type="file" id="hero_background_image" name="hero_background_image" accept="image/png,image/jpeg,image/jpg,image/svg" onchange="previewImage(this, 'hero-image-preview')">
                         <small>Image de fond pour la section héro (PNG, JPG, SVG). Max 2Mo. Recommandé : format large (1920x1080 minimum)</small>
-                    </div>
-
-                    <!-- About / À propos settings -->
-                    <div class="form-group">
-                        <label for="about_image">Image À propos</label>
-                        <?php $about_img = getSetting('about_image', ''); ?>
-                        <div style="margin-bottom:10px;">
-                            <img id="about-image-preview" src="<?php echo $about_img ? UPLOAD_URL . ltrim($about_img, '/') : ''; ?>" alt="<?php echo htmlspecialchars(getSetting('about_image_alt', 'À propos')); ?>" style="max-height:100px; <?php echo $about_img ? '' : 'display:none;'; ?>">
                         </div>
-                        <input type="file" id="about_image" name="about_image" accept="image/*" onchange="previewImage(this, 'about-image-preview')">
-                        <input type="text" id="about_image_alt" name="about_image_alt" value="<?php echo htmlspecialchars(getSetting('about_image_alt', '')); ?>" placeholder="Texte alternatif pour l'image">
-                    </div>
-                    <div class="form-group">
-                        <label for="about_title">Titre (À propos)</label>
-                        <input type="text" id="about_title" name="about_title" value="<?php echo htmlspecialchars(getSetting('about_title', '')); ?>">
-                    </div>
-                    <div class="form-group">
-                        <label for="about_description">Description (À propos)</label>
-                        <textarea id="about_description" name="about_description"><?php echo htmlspecialchars(getSetting('about_description', '')); ?></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="about_story">Histoire de l'entreprise</label>
-                        <textarea id="about_story" name="about_story" style="min-height:200px;"><?php echo htmlspecialchars(getSetting('about_story', '')); ?></textarea>
-                        <small>Racontez l'histoire et les origines de votre entreprise</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="about_objectives">Objectifs</label>
-                        <textarea id="about_objectives" name="about_objectives" style="min-height:150px;"><?php echo htmlspecialchars(getSetting('about_objectives', '')); ?></textarea>
-                        <small>Décrivez les objectifs principaux de votre entreprise</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="about_vision">Vision</label>
-                        <textarea id="about_vision" name="about_vision" style="min-height:150px;"><?php echo htmlspecialchars(getSetting('about_vision', '')); ?></textarea>
-                        <small>Quelle est la vision à long terme de votre entreprise ?</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="about_mission">Mission</label>
-                        <textarea id="about_mission" name="about_mission" style="min-height:150px;"><?php echo htmlspecialchars(getSetting('about_mission', '')); ?></textarea>
-                        <small>Quelle est la mission de votre entreprise ?</small>
-                    </div>
+                        </div>
+                        <button type="button" class="settings-toggle">Voir plus</button>
+                        </div>
 
-                    <!-- Menu Tabs: Qui sommes-nous, Politiques, Historique -->
-                    <hr style="margin:1.5rem 0;">
-                    <h3 style="margin-bottom:1rem;">Menu À propos (Onglets)</h3>
-                    <div class="form-group">
-                        <label for="tab_who_are_we">Onglet 1 : Qui sommes-nous</label>
-                        <textarea id="tab_who_are_we" name="tab_who_are_we" style="min-height:200px;"><?php echo htmlspecialchars(getSetting('tab_who_are_we', '')); ?></textarea>
-                        <small>Présentez votre entreprise en détail pour cet onglet</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="tab_policies">Onglet 2 : Nos Politiques</label>
-                        <textarea id="tab_policies" name="tab_policies" style="min-height:200px;"><?php echo htmlspecialchars(getSetting('tab_policies', '')); ?></textarea>
-                        <small>Décrivez vos politiques (qualité, environnement, RH, etc.)</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="tab_history">Onglet 3 : Historique</label>
-                        <textarea id="tab_history" name="tab_history" style="min-height:200px;"><?php echo htmlspecialchars(getSetting('tab_history', '')); ?></textarea>
-                        <small>Racontez l'évolution et l'historique de votre entreprise</small>
-                    </div>
+                        <div class="settings-block">
+                        <!-- About / À propos settings -->
+                        <h3>À propos</h3>
+                        <div class="settings-block-body">
+                        <div class="form-group">
+                            <label for="about_who">Qui sommes-nous</label>
+                            <textarea id="about_who" name="about_who" style="min-height:180px;"><?php echo htmlspecialchars(getSetting('about_who', '')); ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="about_history">Histoire</label>
+                            <textarea id="about_history" name="about_history" style="min-height:180px;"><?php echo htmlspecialchars(getSetting('about_history', '')); ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="about_mission">Mission</label>
+                            <textarea id="about_mission" name="about_mission" style="min-height:180px;"><?php echo htmlspecialchars(getSetting('about_mission', '')); ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="about_objective">Objectif</label>
+                            <textarea id="about_objective" name="about_objective" style="min-height:180px;"><?php echo htmlspecialchars(getSetting('about_objective', '')); ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="about_vision">Vision</label>
+                            <textarea id="about_vision" name="about_vision" style="min-height:180px;"><?php echo htmlspecialchars(getSetting('about_vision', '')); ?></textarea>
+                        </div>
+                        </div>
+                        <button type="button" class="settings-toggle">Voir plus</button>
+                        </div>
 
-                    <!-- Social media links -->
-                    <hr style="margin:1.5rem 0;">
-                    <h3 style="margin-bottom:1rem;">Réseaux sociaux</h3>
-                    <div class="form-group">
-                        <label for="social_facebook">Facebook</label>
-                        <input type="text" id="social_facebook" name="social_facebook" value="<?php echo htmlspecialchars(getSetting('social_facebook', '')); ?>" placeholder="https://facebook.com/">
-                    </div>
-                    <div class="form-group">
-                        <label for="social_twitter">Twitter</label>
-                        <input type="text" id="social_twitter" name="social_twitter" value="<?php echo htmlspecialchars(getSetting('social_twitter', '')); ?>" placeholder="https://twitter.com/">
-                    </div>
-                    <div class="form-group">
-                        <label for="social_linkedin">LinkedIn</label>
-                        <input type="text" id="social_linkedin" name="social_linkedin" value="<?php echo htmlspecialchars(getSetting('social_linkedin', '')); ?>" placeholder="https://linkedin.com/">
-                    </div>
-                    <div class="form-group">
-                        <label for="social_instagram">Instagram</label>
-                        <input type="text" id="social_instagram" name="social_instagram" value="<?php echo htmlspecialchars(getSetting('social_instagram', '')); ?>" placeholder="https://instagram.com/">
-                    </div>
-                    <div class="form-group">
-                        <label for="social_whatsapp">WhatsApp</label>
-                        <input type="text" id="social_whatsapp" name="social_whatsapp" value="<?php echo htmlspecialchars(getSetting('social_whatsapp', '')); ?>" placeholder="https://wa.me/243xxxxxxxxx">
+                        <div class="settings-block">
+                        <!-- Values / Valeurs settings -->
+                        <h3>Valeurs</h3>
+                        <div class="settings-block-body">
+                        <div class="form-group">
+                            <label for="value_1_title">Valeur 1 - Titre</label>
+                            <input type="text" id="value_1_title" name="value_1_title" value="<?php echo htmlspecialchars(getSetting('value_1_title', 'Expertise')); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="value_1_desc">Valeur 1 - Description</label>
+                            <textarea id="value_1_desc" name="value_1_desc"><?php echo htmlspecialchars(getSetting('value_1_desc', 'Une equipe qualifiee avec des annees d experience dans le secteur industriel.')); ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="value_2_title">Valeur 2 - Titre</label>
+                            <input type="text" id="value_2_title" name="value_2_title" value="<?php echo htmlspecialchars(getSetting('value_2_title', 'Engagement')); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="value_2_desc">Valeur 2 - Description</label>
+                            <textarea id="value_2_desc" name="value_2_desc"><?php echo htmlspecialchars(getSetting('value_2_desc', 'Un engagement total envers la satisfaction de nos clients.')); ?></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="value_3_title">Valeur 3 - Titre</label>
+                            <input type="text" id="value_3_title" name="value_3_title" value="<?php echo htmlspecialchars(getSetting('value_3_title', 'Innovation')); ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="value_3_desc">Valeur 3 - Description</label>
+                            <textarea id="value_3_desc" name="value_3_desc"><?php echo htmlspecialchars(getSetting('value_3_desc', 'Toujours a la pointe des dernieres technologies.')); ?></textarea>
+                        </div>
+                        </div>
+                        <button type="button" class="settings-toggle">Voir plus</button>
+                        </div>
+
+                        <div class="settings-block">
+                        <!-- Social media links -->
+                        <h3>Réseaux sociaux</h3>
+                        <div class="settings-block-body">
+                        <div class="form-group">
+                            <label for="social_facebook">Facebook</label>
+                            <input type="text" id="social_facebook" name="social_facebook" value="<?php echo htmlspecialchars(getSetting('social_facebook', '')); ?>" placeholder="https://facebook.com/">
+                        </div>
+                        <div class="form-group">
+                            <label for="social_twitter">Twitter</label>
+                            <input type="text" id="social_twitter" name="social_twitter" value="<?php echo htmlspecialchars(getSetting('social_twitter', '')); ?>" placeholder="https://twitter.com/">
+                        </div>
+                        <div class="form-group">
+                            <label for="social_linkedin">LinkedIn</label>
+                            <input type="text" id="social_linkedin" name="social_linkedin" value="<?php echo htmlspecialchars(getSetting('social_linkedin', '')); ?>" placeholder="https://linkedin.com/">
+                        </div>
+                        <div class="form-group">
+                            <label for="social_instagram">Instagram</label>
+                            <input type="text" id="social_instagram" name="social_instagram" value="<?php echo htmlspecialchars(getSetting('social_instagram', '')); ?>" placeholder="https://instagram.com/">
+                        </div>
+                        <div class="form-group">
+                            <label for="social_whatsapp">WhatsApp</label>
+                            <input type="text" id="social_whatsapp" name="social_whatsapp" value="<?php echo htmlspecialchars(getSetting('social_whatsapp', '')); ?>" placeholder="https://wa.me/243xxxxxxxxx">
+                        </div>
+                        </div>
+                        <button type="button" class="settings-toggle">Voir plus</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <button type="submit" class="btn-submit" id="save-settings-btn">
@@ -919,6 +1444,72 @@ if (!isAdmin()) {
                     </tbody>
                 </table>
             </div>
+
+            <!-- Event Posters Section -->
+            <div id="event-posters" class="content-section">
+                <h2>Affiches des événements</h2>
+                <form method="POST" action="save_event_poster.php" class="card" style="max-width: 700px;" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="poster_title">Titre (optionnel)</label>
+                        <input type="text" id="poster_title" name="poster_title" placeholder="Ex: Affiche conférence 2026">
+                    </div>
+                    <div class="form-group">
+                        <label for="poster_image">Image d'affiche</label>
+                        <input type="file" id="poster_image" name="poster_image" accept="image/*" required>
+                        <small>PNG, JPG, SVG. Max 2Mo.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="poster_order">Ordre d'affichage</label>
+                        <input type="number" id="poster_order" name="poster_order" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn-submit">
+                            <span class="btn-text">Ajouter l'affiche</span>
+                        </button>
+                    </div>
+                </form>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Affiche</th>
+                            <th>Titre</th>
+                            <th>Ordre</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $posters = $conn->query("SELECT * FROM event_posters ORDER BY order_position ASC, created_at DESC");
+                        if ($posters && $posters->num_rows > 0) {
+                            while ($row = $posters->fetch_assoc()) {
+                                ?>
+                                <tr>
+                                    <td>
+                                        <img src="<?php echo htmlspecialchars(dashboardImageUrl($row['image_path'] ?? '')); ?>" alt="<?php echo htmlspecialchars($row['title'] ?? 'Affiche'); ?>" class="dashboard-zoomable" style="width:80px;height:60px;object-fit:cover;border-radius:8px;cursor:zoom-in;">
+                                    </td>
+                                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                                    <td><?php echo (int)$row['order_position']; ?></td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="delete_event_poster.php?id=<?php echo $row['id']; ?>" class="btn-delete" onclick="return confirm('Êtes-vous sûr?');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                        } else {
+                            ?>
+                            <tr>
+                                <td colspan="5">Aucune affiche pour le moment.</td>
+                            </tr>
+                            <?php
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
             <!-- Contacts Section -->
             <div id="contacts" class="content-section">
                 <h2>Messages de contact</h2>
@@ -954,6 +1545,75 @@ if (!isAdmin()) {
                                 </tr>
                                 <?php
                             }
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Testimonials Section -->
+            <div id="testimonials" class="content-section">
+                <h2>T&eacute;moignages</h2>
+                <div class="dashboard-grid" style="margin-bottom: 1rem;">
+                    <div class="card" data-filter="all">
+                        <h3><i class="bi bi-stack"></i><span>Total</span></h3>
+                        <div class="number"><?php echo $stats['testimonials_total'] ?? 0; ?></div>
+                        <p>Nombre total</p>
+                    </div>
+                    <div class="card" data-filter="<?php echo htmlspecialchars($testimonialApprovedValue); ?>">
+                        <h3><i class="bi bi-check2-circle"></i><span>Valid&eacute;s</span></h3>
+                        <div class="number"><?php echo $stats['testimonials_approved'] ?? 0; ?></div>
+                        <p>T&eacute;moignages approuv&eacute;s</p>
+                    </div>
+                    <div class="card" data-filter="<?php echo htmlspecialchars($testimonialRejectedValue); ?>">
+                        <h3><i class="bi bi-x-circle"></i><span>Nouveaux t&eacute;moignages</span></h3>
+                        <div class="number"><?php echo $stats['testimonials_rejected'] ?? 0; ?></div>
+                        <p>T&eacute;moignages refus&eacute;s</p>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Message</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $result = $conn->query("SELECT id, name, email, message, `$testimonialStatusCol` AS status, created_at FROM testimonials ORDER BY created_at DESC");
+                        if ($result && $result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                ?>
+                                <tr data-status="<?php echo htmlspecialchars($row['status']); ?>">
+                                    <td><?php echo htmlspecialchars($row['name']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
+                                    <td><?php echo htmlspecialchars(mb_strimwidth($row['message'], 0, 70, '...')); ?></td>
+                                    <td><?php echo ucfirst($row['status']); ?></td>
+                                    <td><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <?php if ($row['status'] !== $testimonialApprovedValue): ?>
+                                                <a href="approve_testimonial.php?id=<?php echo $row['id']; ?>" class="btn-edit"><i class="bi bi-check2-circle me-1"></i><span>Valider</span></a>
+                                            <?php endif; ?>
+                                            <?php if ($row['status'] !== $testimonialRejectedValue): ?>
+                                                <a href="reject_testimonial.php?id=<?php echo $row['id']; ?>" class="btn-edit"><i class="bi bi-x-circle me-1"></i><span>Rejeter</span></a>
+                                            <?php endif; ?>
+                                            <a href="delete_testimonial.php?id=<?php echo $row['id']; ?>" class="btn-delete" onclick="return confirm('Êtes-vous sûr?');"><i class="bi bi-trash me-1"></i><span>Supprimer</span></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                        } else {
+                            ?>
+                            <tr>
+                                <td colspan="6">Aucun témoignage pour le moment.</td>
+                            </tr>
+                            <?php
                         }
                         ?>
                     </tbody>
@@ -998,6 +1658,20 @@ if (!isAdmin()) {
                         ?>
                     </tbody>
                 </table>
+            </div>
+
+            <div id="dashboard-modal" class="dashboard-modal" aria-hidden="true">
+                <div class="dashboard-modal-content" role="dialog" aria-modal="true">
+                    <div class="dashboard-modal-header">
+                        <h3 id="dashboard-modal-title">Détails</h3>
+                        <button id="dashboard-modal-close" class="dashboard-modal-close" aria-label="Fermer">x</button>
+                    </div>
+                    <div id="dashboard-modal-body" class="dashboard-modal-body"></div>
+                </div>
+            </div>
+            <div id="image-lightbox" class="image-lightbox" aria-hidden="true">
+                <button id="image-lightbox-close" class="image-lightbox-close" aria-label="Fermer">x</button>
+                <img id="image-lightbox-img" src="" alt="">
             </div>
         </div>
     </div>
@@ -1191,6 +1865,106 @@ if (!isAdmin()) {
                     }
                 });
             });
+
+            document.querySelectorAll('.settings-block').forEach(function (block) {
+                const body = block.querySelector('.settings-block-body');
+                const toggle = block.querySelector('.settings-toggle');
+                if (!body || !toggle) {
+                    return;
+                }
+                toggle.addEventListener('click', function () {
+                    const expanded = block.classList.toggle('is-expanded');
+                    toggle.textContent = expanded ? 'Voir moins' : 'Voir plus';
+                });
+            });
+
+            // Testimonials card filtering
+            var testimonialsSection = document.getElementById('testimonials');
+            if (testimonialsSection) {
+                var cards = testimonialsSection.querySelectorAll('.dashboard-grid .card[data-filter]');
+                var rows = testimonialsSection.querySelectorAll('tbody tr[data-status]');
+                function applyFilter(filter) {
+                    rows.forEach(function (row) {
+                        if (filter === 'all') {
+                            row.style.display = '';
+                            return;
+                        }
+                        var status = row.getAttribute('data-status') || '';
+                        row.style.display = status === filter ? '' : 'none';
+                    });
+                }
+                cards.forEach(function (card) {
+                    card.addEventListener('click', function () {
+                        cards.forEach(function (c) { c.classList.remove('is-active'); });
+                        card.classList.add('is-active');
+                        var filter = card.getAttribute('data-filter') || 'all';
+                        applyFilter(filter);
+                    });
+                });
+            }
+
+
+            const modal = document.getElementById('dashboard-modal');
+            const modalTitle = document.getElementById('dashboard-modal-title');
+            const modalBody = document.getElementById('dashboard-modal-body');
+            document.querySelectorAll('.dashboard-grid .card').forEach(function (card) {
+                card.addEventListener('click', function () {
+                    const key = card.getAttribute('data-card');
+                    if (!key || !modal || !modalTitle || !modalBody) return;
+                    const detail = document.querySelector('#dashboard-details [data-detail=\"' + key + '\"]');
+                    if (!detail) return;
+                    const titleEl = card.querySelector('span');
+                    modalTitle.textContent = titleEl ? titleEl.textContent : 'Détails';
+                    modalBody.innerHTML = detail.innerHTML;
+                    modal.classList.add('active');
+                    modal.setAttribute('aria-hidden', 'false');
+                    modal.style.display = 'flex';
+                });
+            });
+            const modalClose = document.getElementById('dashboard-modal-close');
+            if (modalClose && modal) {
+                modalClose.addEventListener('click', function () {
+                    modal.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    modal.style.display = 'none';
+                });
+            }
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        modal.classList.remove('active');
+                        modal.setAttribute('aria-hidden', 'true');
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImg = document.getElementById('image-lightbox-img');
+            const lightboxClose = document.getElementById('image-lightbox-close');
+            document.addEventListener('click', function (e) {
+                const target = e.target;
+                if (!target || !target.classList || !target.classList.contains('dashboard-zoomable')) return;
+                if (!lightbox || !lightboxImg) return;
+                lightboxImg.src = target.src;
+                lightboxImg.alt = target.alt || '';
+                lightbox.classList.add('active');
+                lightbox.setAttribute('aria-hidden', 'false');
+            });
+            function closeLightbox() {
+                if (!lightbox) return;
+                lightbox.classList.remove('active');
+                lightbox.setAttribute('aria-hidden', 'true');
+                if (lightboxImg) lightboxImg.src = '';
+            }
+            if (lightboxClose) {
+                lightboxClose.addEventListener('click', closeLightbox);
+            }
+            if (lightbox) {
+                lightbox.addEventListener('click', function (e) {
+                    if (e.target === lightbox) closeLightbox();
+                });
+            }
         });
     </script>
 </body>
